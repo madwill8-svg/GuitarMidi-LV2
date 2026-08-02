@@ -9,7 +9,14 @@ find_package(PkgConfig REQUIRED)
 find_package(OpenMP REQUIRED)
 pkg_check_modules(Pango REQUIRED pango)
 
-set(SRC guitarmidi.cpp  noteclassifier.cpp midioutput.cpp fretboard.cpp harmonicgroup.cpp logging.cpp)
+set(SRC
+    guitarmidi.cpp
+    noteclassifier.cpp
+    midioutput.cpp
+    fretboard.cpp
+    harmonicgroup.cpp
+    logging.cpp
+    stringfingerprint.cpp)
 
 add_library(guitarmidi SHARED ${SRC})
 if(WITH_AUBIO=On)
@@ -17,8 +24,16 @@ message("Building with onset support")
 target_link_libraries(guitarmidi dsp aubio ${Pango_LIBRARIES})
 else()
 message("Building without onset support")
-target_link_libraries(guitarmidi PUBLIC dsp  ${Pango_LIBRARIES} )
-target_link_libraries(guitarmidi PUBLIC OpenMP::OpenMP_CXX )
+target_link_libraries(guitarmidi PUBLIC dsp ${Pango_LIBRARIES})
+target_link_libraries(guitarmidi PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
+if(BUILD_FINGERPRINT_TESTS)
+    add_executable(stringfingerprint_test
+        ../tests/stringfingerprint_test.cpp
+        stringfingerprint.cpp)
+    target_include_directories(stringfingerprint_test PRIVATE include)
+    add_test(NAME stringfingerprint_test COMMAND stringfingerprint_test)
 endif()
 
 install(TARGETS guitarmidi
